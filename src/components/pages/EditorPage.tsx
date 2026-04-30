@@ -100,8 +100,8 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
       </div>
 
       {/* Номер + дата */}
-      <div style={{ paddingTop: "4px", marginBottom: "4px", fontSize: "14px" }}>
-        <div style={{ marginBottom: "3px" }}>
+      <div style={{ paddingTop: "2px", marginBottom: "2px", fontSize: "13px", lineHeight: "1.4" }}>
+        <div style={{ marginBottom: "1px" }}>
           <span>Номер витягу: </span>
           <span style={{ fontWeight: 700 }}>{f("nomervytiah")}</span>
         </div>
@@ -112,7 +112,7 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
       </div>
 
       {/* Таблиця особи */}
-      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px", fontSize: "14px" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px", fontSize: "13px" }}>
         <tbody>
           {([
             ["Прізвище", f("prizvyshche")],
@@ -123,8 +123,8 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
             ["РНОКПП (за наявності)", f("rnokpp")],
           ] as [string, string][]).map(([label, val], idx, arr) => (
             <tr key={label}>
-              <td style={{ padding: "4px 6px 2px 4px", width: "43%", color: "#222" }}>{label}</td>
-              <td style={{ padding: "4px 0 2px 8px", fontWeight: 700, borderBottom: "1px solid #000" }}>{val}</td>
+              <td style={{ padding: "2px 6px 2px 4px", width: "43%", color: "#222" }}>{label}</td>
+              <td style={{ padding: "2px 0 2px 8px", fontWeight: 700, borderBottom: "1px solid #000" }}>{val}</td>
             </tr>
           ))}
         </tbody>
