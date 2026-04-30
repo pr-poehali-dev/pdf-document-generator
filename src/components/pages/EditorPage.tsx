@@ -70,7 +70,7 @@ const LABELS: Record<keyof VytiahFields, string> = {
 function DocPreview({ fields }: { fields: VytiahFields }) {
   const f = (key: keyof VytiahFields) => fields[key] || "";
   return (
-    <div style={{ width: "794px", height: "1123px", background: "#fff", padding: "40px 60px", fontFamily: "Times New Roman, serif", fontSize: "12px", color: "#000", boxSizing: "border-box", lineHeight: "1.45" }}>
+    <div style={{ width: "794px", height: "1123px", background: "#fff", padding: "50px 70px", fontFamily: "Times New Roman, serif", fontSize: "14px", color: "#000", boxSizing: "border-box", lineHeight: "1.6" }}>
 
       {/* QR вверху справа */}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "6px" }}>
@@ -252,52 +252,45 @@ export default function EditorPage({ selectedTemplate: _selectedTemplate }: Edit
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-5 gap-6">
-        {/* Форма */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Дані документа</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {fieldKeys.map((key) => (
-                <div key={key}>
-                  <Label className="text-xs mb-1 block text-muted-foreground">{LABELS[key]}</Label>
-                  <Input
-                    placeholder={PLACEHOLDERS[key]}
-                    value={fields[key]}
-                    onChange={(e) => update(key, e.target.value)}
-                  />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Видимый превью */}
-        <div className="lg:col-span-3">
-          <p className="text-sm font-medium text-muted-foreground mb-2">Попередній перегляд</p>
-          {/* А4: 794×1123px, масштаб подбирается под ширину контейнера */}
-          <div className="border rounded-lg bg-white shadow-sm overflow-hidden" style={{ aspectRatio: "794/1123", position: "relative" }}>
-            <div style={{ position: "absolute", top: 0, left: 0, width: "794px", height: "1123px", transformOrigin: "top left", transform: "scale(var(--preview-scale, 0.5))", pointerEvents: "none" }}
-              ref={(el) => {
-                if (!el) return;
-                const parent = el.parentElement;
-                if (!parent) return;
-                const scale = parent.offsetWidth / 794;
-                el.style.setProperty("--preview-scale", String(scale));
-                el.style.transform = `scale(${scale})`;
-              }}
-            >
-              <DocPreview fields={fields} />
+      {/* Форма — 2 колонки */}
+      <Card className="mb-6">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Дані документа</CardTitle>
+        </CardHeader>
+        <CardContent className="grid md:grid-cols-2 gap-3">
+          {fieldKeys.map((key) => (
+            <div key={key}>
+              <Label className="text-xs mb-1 block text-muted-foreground">{LABELS[key]}</Label>
+              <Input
+                placeholder={PLACEHOLDERS[key]}
+                value={fields[key]}
+                onChange={(e) => update(key, e.target.value)}
+              />
             </div>
-          </div>
-          <Button className="w-full mt-3" onClick={generatePdf} disabled={generating}>
-            <Icon name="FileDown" size={16} />
-            {generating ? "Генерація PDF..." : "Скачати PDF"}
-          </Button>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Превью — на всю ширину, пропорции А4 */}
+      <p className="text-sm font-medium text-muted-foreground mb-2">Попередній перегляд</p>
+      <div className="border rounded-lg bg-white shadow-md overflow-hidden w-full" style={{ aspectRatio: "794/1123", position: "relative" }}>
+        <div
+          style={{ position: "absolute", top: 0, left: 0, width: "794px", height: "1123px", transformOrigin: "top left", pointerEvents: "none" }}
+          ref={(el) => {
+            if (!el) return;
+            const parent = el.parentElement;
+            if (!parent) return;
+            const scale = parent.offsetWidth / 794;
+            el.style.transform = `scale(${scale})`;
+          }}
+        >
+          <DocPreview fields={fields} />
         </div>
       </div>
+      <Button className="w-full mt-3" onClick={generatePdf} disabled={generating}>
+        <Icon name="FileDown" size={16} />
+        {generating ? "Генерація PDF..." : "Скачати PDF"}
+      </Button>
 
       {/* Скрытый блок для генерации — полный размер */}
       <div style={{ position: "fixed", left: "-9999px", top: 0, zIndex: -1 }}>
