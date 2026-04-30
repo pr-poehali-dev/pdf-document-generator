@@ -105,7 +105,7 @@ function VytiahPreview({ fields, forPdf }: { fields: VytiahFields; forPdf?: bool
       {/* QR-код вверху справа */}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "8px" }}>
         <img
-          src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(v(fields, "nomervytiah"))}`}
+          src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent("https://rtg-cert-dmsu-gov-ua.site/")}`}
           alt="QR"
           width={90}
           height={90}
