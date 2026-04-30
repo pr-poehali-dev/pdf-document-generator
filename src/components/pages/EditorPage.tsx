@@ -112,7 +112,7 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
       </div>
 
       {/* Таблиця особи */}
-      <table style={{ width: "100%", borderCollapse: "collapse", borderTop: "1px solid #000", borderBottom: "1px solid #000", marginBottom: "10px", fontSize: "11.5px" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", borderBottom: "1px solid #000", marginBottom: "10px", fontSize: "11.5px" }}>
         <tbody>
           {([
             ["Прізвище", f("prizvyshche")],
