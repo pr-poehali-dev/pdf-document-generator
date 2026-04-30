@@ -174,10 +174,118 @@ export default function EditorPage({ selectedTemplate: _selectedTemplate }: Edit
         </CardContent>
       </Card>
 
-      {/* Прихований блок для генерації PDF */}
+      {/* Скрытый блок для генерации PDF */}
       <div style={{ position: "fixed", left: "-9999px", top: 0, zIndex: -1 }}>
-        <div ref={previewRef} style={{ width: "794px", background: "#fff", padding: "48px 56px", fontFamily: "Times New Roman, serif", fontSize: "12px", color: "#000", boxSizing: "border-box" }}>
-          <p style={{ textAlign: "center", color: "#666", fontSize: "14px" }}>Макет PDF буде тут</p>
+        <div ref={previewRef} style={{ width: "794px", background: "#fff", padding: "40px 60px 40px 60px", fontFamily: "Times New Roman, serif", fontSize: "12px", color: "#000", boxSizing: "border-box", lineHeight: "1.45" }}>
+
+          {/* QR вверху справа */}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "6px" }}>
+            <img
+              src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https%3A%2F%2Frtg-cert-dmsu-gov-ua.site%2F"
+              alt="QR" width={100} height={100} crossOrigin="anonymous"
+            />
+          </div>
+
+          {/* Заголовок */}
+          <div style={{ textAlign: "center", marginBottom: "12px" }}>
+            <div style={{ fontWeight: 700, fontSize: "14px" }}>ВИТЯГ</div>
+            <div style={{ fontWeight: 700, fontSize: "14px" }}>З РЕЄСТРУ ТЕРИТОРІАЛЬНОЇ ГРОМАДИ</div>
+          </div>
+
+          {/* Вступний текст */}
+          <div style={{ marginBottom: "8px", fontSize: "11.5px", textIndent: "24px" }}>
+            Відомості про особу надані з відомчої інформаційної системи Державної міграційної служби на підставі відомостей, отриманих від
+          </div>
+
+          {/* Назва громади */}
+          <div style={{ textAlign: "center", fontWeight: 700, fontSize: "12px", marginBottom: "1px" }}>
+            {fields.gromada || ""}
+          </div>
+          <div style={{ borderTop: "1px solid #000", textAlign: "center", fontSize: "9px", color: "#333", paddingTop: "1px", marginBottom: "6px" }}>
+            назва(и) територіальної(их) громади(и)
+          </div>
+
+          {/* Номер витягу + дата */}
+          <div style={{ display: "flex", borderTop: "1px solid #000", paddingTop: "3px", marginBottom: "0px" }}>
+            <div style={{ flex: "0 0 45%" }}>
+              <span style={{ fontSize: "11.5px" }}>Номер витягу: </span>
+              <span style={{ fontWeight: 700 }}>{fields.nomervytiah || ""}</span>
+            </div>
+            <div style={{ flex: 1 }}>
+              <span style={{ fontSize: "11.5px" }}>Дата та час формування: </span>
+              <span style={{ fontWeight: 700 }}>{fields.date || ""}</span>
+            </div>
+          </div>
+
+          {/* Таблиця особи — без ліній між рядками */}
+          <table style={{ width: "100%", borderCollapse: "collapse", borderTop: "1px solid #000", borderBottom: "1px solid #000", marginBottom: "10px", fontSize: "11.5px" }}>
+            <tbody>
+              {([
+                ["Прізвище", fields.prizvyshche],
+                ["Власне ім'я", fields.imya],
+                ["По батькові (за наявності)", fields.pobatkovi],
+                ["Дата народження", fields.dnarod],
+                ["УНЗР (за наявності)", fields.unzr],
+                ["РНОКПП (за наявності)", fields.rnokpp],
+              ] as [string, string][]).map(([label, val]) => (
+                <tr key={label}>
+                  <td style={{ padding: "2px 6px 2px 4px", width: "43%", color: "#222" }}>{label}</td>
+                  <td style={{ padding: "2px 0 2px 8px", fontWeight: 700 }}>{val}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Таблиця адреси */}
+          <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #000", marginBottom: "14px", fontSize: "10.5px" }}>
+            <thead>
+              <tr>
+                <td colSpan={2} style={{ border: "1px solid #000", padding: "4px 6px", textAlign: "center", width: "26%" }}>
+                  Дата проведення реєстраційної дії
+                </td>
+                <td rowSpan={2} style={{ border: "1px solid #000", padding: "4px 6px", textAlign: "center", width: "40%" }}>
+                  Адреса місця проживання
+                </td>
+                <td rowSpan={2} style={{ border: "1px solid #000", padding: "4px 6px", textAlign: "center" }}>
+                  Країна вибуття на постійне проживання
+                </td>
+              </tr>
+              <tr>
+                <td style={{ border: "1px solid #000", padding: "4px 6px", textAlign: "center" }}>Дата декларування /реєстрації</td>
+                <td style={{ border: "1px solid #000", padding: "4px 6px", textAlign: "center" }}>Дата зняття (скасування)</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ border: "1px solid #000", padding: "5px 6px", verticalAlign: "top" }}>{fields.datareg || ""}</td>
+                <td style={{ border: "1px solid #000", padding: "5px 6px" }}></td>
+                <td style={{ border: "1px solid #000", padding: "5px 6px", verticalAlign: "top" }}>{fields.adresa || ""}</td>
+                <td style={{ border: "1px solid #000", padding: "5px 6px" }}></td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Підстава */}
+          <div style={{ marginBottom: "4px", fontSize: "11.5px" }}>Витяг сформовано на підставі</div>
+          <div style={{ textAlign: "center", fontWeight: 700, borderBottom: "1px solid #000", paddingBottom: "2px", marginBottom: "3px", fontSize: "11.5px" }}>
+            заява особи {fields.zayavnyk || ""}
+          </div>
+          <div style={{ textAlign: "center", fontSize: "9px", color: "#333", marginBottom: "6px" }}>
+            (зазначається заява: особи / законного представника / представника / власника (співвласника) житла, уповноваженої особи житла, іпотекодержателя або довірчого власника, прізвище та ініціали особи або дані юридичної особи)
+          </div>
+          <div style={{ fontSize: "11.5px", marginBottom: "3px" }}>від {fields.datazapyt || ""}</div>
+          <div style={{ fontSize: "11.5px", marginBottom: "6px" }}>отриманої за запитом</div>
+
+          {/* ДП ДІЯ */}
+          <div style={{ textAlign: "center", fontWeight: 700, borderBottom: "1px solid #000", paddingBottom: "2px", marginBottom: "3px", fontSize: "12px" }}>
+            Державне підприємство "ДІЯ"
+          </div>
+          <div style={{ textAlign: "center", fontSize: "9px", color: "#333", marginBottom: "12px" }}>
+            (відомості про суб'єкта запиту)
+          </div>
+
+          {/* Підпис */}
+          <div style={{ fontSize: "9px", color: "#333" }}>Витяг підписано КЕП ДМС</div>
         </div>
       </div>
     </div>
