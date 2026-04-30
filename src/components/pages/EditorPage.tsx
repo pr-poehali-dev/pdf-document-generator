@@ -132,7 +132,7 @@ function VytiahPreview({ fields, forPdf }: { fields: VytiahFields; forPdf?: bool
       <div style={{ ...center, ...small, marginBottom: "8px" }}>назва(и) територіальної(их) громади(и)</div>
 
       {/* Номер + дата в один рядок */}
-      <div style={{ display: "flex", gap: "24px", marginBottom: "4px", ...lineTop, paddingTop: "4px" }}>
+      <div style={{ display: "flex", gap: "24px", marginBottom: "0px", ...lineTop, paddingTop: "4px", paddingBottom: "4px", borderBottom: "1px solid #000" }}>
         <div style={{ flex: 1 }}>
           <span>Номер витягу: </span>
           <span style={bold}>{v(fields, "nomervytiah")}</span>
@@ -144,7 +144,7 @@ function VytiahPreview({ fields, forPdf }: { fields: VytiahFields; forPdf?: bool
       </div>
 
       {/* Таблиця полів особи */}
-      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px", borderTop: "1px solid #000" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px" }}>
         <tbody>
           {(
             [
@@ -156,9 +156,9 @@ function VytiahPreview({ fields, forPdf }: { fields: VytiahFields; forPdf?: bool
               ["РНОКПП (за наявності)", v(fields, "rnokpp")],
             ] as [string, string][]
           ).map(([label, val]) => (
-            <tr key={label} style={{ borderBottom: "1px solid #000" }}>
-              <td style={{ padding: "3px 8px 3px 4px", width: "44%", color: "#000", fontStyle: "italic" }}>{label}</td>
-              <td style={{ padding: "3px 0 3px 12px", fontWeight: 700 }}>{val}</td>
+            <tr key={label} style={{ borderBottom: "1px solid #555" }}>
+              <td style={{ padding: "3px 4px 3px 4px", width: "42%", color: "#333", fontWeight: 400, fontStyle: "normal" }}>{label}</td>
+              <td style={{ padding: "3px 0 3px 8px", fontWeight: 700, color: "#000" }}>{val}</td>
             </tr>
           ))}
         </tbody>
