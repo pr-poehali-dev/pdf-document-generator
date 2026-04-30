@@ -100,7 +100,7 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
       </div>
 
       {/* Номер + дата */}
-      <div style={{ borderTop: "1px solid #000", paddingTop: "3px", marginBottom: "0" }}>
+      <div style={{ paddingTop: "3px", marginBottom: "0" }}>
         <div style={{ marginBottom: "2px" }}>
           <span>Номер витягу: </span>
           <span style={{ fontWeight: 700 }}>{f("nomervytiah")}</span>
