@@ -78,7 +78,7 @@ const LABELS: Record<keyof VytiahFields, string> = {
 };
 
 function v(fields: VytiahFields, key: keyof VytiahFields) {
-  return fields[key] || PLACEHOLDERS[key];
+  return fields[key] || "";
 }
 
 /* ---------- Превью документа точно по скриншоту ---------- */
