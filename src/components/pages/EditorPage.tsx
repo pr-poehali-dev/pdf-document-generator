@@ -97,67 +97,44 @@ export default function EditorPage({ selectedTemplate }: EditorPageProps) {
   };
 
   const generatePdf = async () => {
+    if (!previewRef.current) return;
     setGenerating(true);
     try {
-      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const element = previewRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
 
-      const title = customTitle || templateTitle;
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
       const pageW = 210;
-      const margin = 20;
-      const contentW = pageW - margin * 2;
+      const pageH = 297;
+      const margin = 10;
+      const imgW = pageW - margin * 2;
+      const imgH = (canvas.height * imgW) / canvas.width;
+      const availH = pageH - margin * 2;
 
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(13);
-      const titleLines = doc.splitTextToSize(title.toUpperCase(), contentW);
-      let y = 30;
-      titleLines.forEach((line: string) => {
-        doc.text(line, pageW / 2, y, { align: "center" });
-        y += 7;
-      });
-
-      y += 5;
-      doc.setDrawColor(30, 60, 120);
-      doc.setLineWidth(0.5);
-      doc.line(margin, y, pageW - margin, y);
-      y += 8;
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-
-      fields.forEach((field) => {
-        if (y > 270) {
-          doc.addPage();
-          y = 20;
+      if (imgH <= availH) {
+        pdf.addImage(imgData, "PNG", margin, margin, imgW, imgH);
+      } else {
+        let renderedH = 0;
+        while (renderedH < imgH) {
+          const sliceH = Math.min(availH, imgH - renderedH);
+          if (renderedH > 0) pdf.addPage();
+          pdf.addImage(imgData, "PNG", margin, margin - renderedH, imgW, imgH);
+          renderedH += sliceH;
+          // clip
+          pdf.setFillColor(255, 255, 255);
+          pdf.rect(0, margin + sliceH, pageW, pageH, "F");
         }
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(80, 80, 80);
-        doc.text(field.label + ":", margin, y);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(0, 0, 0);
-        const val = field.value || "(не заповнено)";
-        const valLines = doc.splitTextToSize(val, contentW - 5);
-        valLines.forEach((line: string, i: number) => {
-          if (i === 0) {
-            doc.text(line, margin + 5, y + 5);
-          } else {
-            y += 5;
-            doc.text(line, margin + 5, y + 5);
-          }
-        });
-        y += 12;
-        doc.setDrawColor(220, 220, 220);
-        doc.setLineWidth(0.2);
-        doc.line(margin, y - 3, pageW - margin, y - 3);
-      });
-
-      y += 5;
-      doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text(`Сформовано: ${new Date().toLocaleDateString("uk-UA")}`, margin, y);
+      }
 
       const filename = (customTitle || templateTitle).substring(0, 40).replace(/\s+/g, "_") + ".pdf";
-      doc.save(filename);
-
+      pdf.save(filename);
       toast({ title: "PDF готовий!", description: "Документ збережено" });
     } catch {
       toast({ title: "Помилка генерації", variant: "destructive" });
@@ -254,18 +231,24 @@ export default function EditorPage({ selectedTemplate }: EditorPageProps) {
                   <CardTitle className="text-base">Попередній перегляд</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-white border rounded-md p-4 min-h-64 shadow-inner text-xs font-mono">
-                    <div className="text-center font-bold text-sm mb-3 border-b pb-2">
+                  <div
+                    ref={previewRef}
+                    className="bg-white border rounded-md p-6 min-h-64 shadow-inner"
+                    style={{ fontFamily: "'Golos Text', sans-serif", fontSize: "13px", color: "#111" }}
+                  >
+                    <div style={{ textAlign: "center", fontWeight: 700, fontSize: "14px", marginBottom: "12px", paddingBottom: "10px", borderBottom: "2px solid #1e3c78" }}>
                       {(customTitle || templateTitle).toUpperCase()}
                     </div>
                     {fields.map((f) => (
-                      <div key={f.id} className="mb-2 border-b border-dashed border-gray-100 pb-1">
-                        <span className="text-gray-500">{f.label}: </span>
-                        <span className="font-medium">{f.value || <span className="text-gray-300 italic">не заповнено</span>}</span>
+                      <div key={f.id} style={{ marginBottom: "10px", paddingBottom: "8px", borderBottom: "1px dashed #ddd" }}>
+                        <div style={{ fontSize: "11px", color: "#666", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{f.label}</div>
+                        <div style={{ fontWeight: 500, color: f.value ? "#111" : "#bbb", fontStyle: f.value ? "normal" : "italic" }}>
+                          {f.value || "не заповнено"}
+                        </div>
                       </div>
                     ))}
-                    <div className="mt-4 text-gray-400 text-right">
-                      {new Date().toLocaleDateString("uk-UA")}
+                    <div style={{ marginTop: "16px", fontSize: "11px", color: "#aaa", textAlign: "right" }}>
+                      Сформовано: {new Date().toLocaleDateString("uk-UA")}
                     </div>
                   </div>
                   <Button className="w-full mt-4" onClick={generatePdf} disabled={generating}>
