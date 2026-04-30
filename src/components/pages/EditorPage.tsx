@@ -126,10 +126,14 @@ function VytiahPreview({ fields, forPdf }: { fields: VytiahFields; forPdf?: bool
       </div>
 
       {/* Громада */}
-      <div style={{ ...center, ...bold, ...line, paddingBottom: "4px", marginBottom: "2px" }}>
+      <div style={{ ...center, ...bold, paddingBottom: "4px", marginBottom: "2px" }}>
         {v(fields, "gromada")}
       </div>
-      <div style={{ ...center, ...small, marginBottom: "8px" }}>назва(и) територіальної(их) громади(и)</div>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+        <div style={{ flex: 1, height: "1px", background: "#000" }} />
+        <div style={{ ...small, whiteSpace: "nowrap" }}>назва(и) територіальної(их) громади(и)</div>
+        <div style={{ flex: 1, height: "1px", background: "#000" }} />
+      </div>
 
       {/* Номер + дата в один рядок */}
       <div style={{ display: "flex", gap: "24px", marginBottom: "0px", ...lineTop, paddingTop: "4px", paddingBottom: "4px", borderBottom: "1px solid #000" }}>
