@@ -124,7 +124,7 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
           ] as [string, string][]).map(([label, val]) => (
             <tr key={label}>
               <td style={{ padding: "2px 6px 2px 4px", width: "43%", color: "#222" }}>{label}</td>
-              <td style={{ padding: "2px 0 2px 8px", fontWeight: 700 }}>{val}</td>
+              <td style={{ padding: "2px 0 2px 8px", fontWeight: 700, borderBottom: "1px solid #000" }}>{val}</td>
             </tr>
           ))}
         </tbody>
