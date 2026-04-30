@@ -7,92 +7,239 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Icon from "@/components/ui/icon";
 import { useToast } from "@/components/ui/use-toast";
 import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface EditorPageProps {
   selectedTemplate: string | null;
 }
 
-interface Field {
-  id: string;
-  label: string;
-  placeholder: string;
-  value: string;
+interface VytiahFields {
+  nomervytiah: string;
+  date: string;
+  gromada: string;
+  prizvyshche: string;
+  imya: string;
+  pobatkovi: string;
+  dnarod: string;
+  unzr: string;
+  rnokpp: string;
+  adresa: string;
+  datareg: string;
+  zayavnyk: string;
+  datazapyt: string;
 }
 
-const TEMPLATE_FIELDS: Record<string, Field[]> = {
-  "vytiah-registry": [
-    { id: "nomervytiah", label: "Номер витягу", placeholder: "2023/007497299", value: "" },
-    { id: "date", label: "Дата та час формування", placeholder: "18.09.2023 18 год. 56 хв.", value: "" },
-    { id: "gromada", label: "Назва громади", placeholder: "Харківська територіальна громада", value: "" },
-    { id: "prizvyshche", label: "Прізвище", placeholder: "Чалий", value: "" },
-    { id: "imya", label: "Власне ім'я", placeholder: "Сергій", value: "" },
-    { id: "pobatkovi", label: "По батькові", placeholder: "Сергійович", value: "" },
-    { id: "dnarod", label: "Дата народження", placeholder: "14.01.2007", value: "" },
-    { id: "unzr", label: "УНЗР", placeholder: "20070114-07150", value: "" },
-    { id: "rnokpp", label: "РНОКПП", placeholder: "3909502612", value: "" },
-    { id: "adresa", label: "Адреса місця проживання", placeholder: "м. Харків, вул. Сидоренківська, буд. 48, кв. 5", value: "" },
-    { id: "datareg", label: "Дата декларування/реєстрації", placeholder: "30.01.2007", value: "" },
-  ],
-  "dovidka-prozhyvannya": [
-    { id: "prizvyshche", label: "Прізвище", placeholder: "Іваненко", value: "" },
-    { id: "imya", label: "Ім'я", placeholder: "Іван", value: "" },
-    { id: "pobatkovi", label: "По батькові", placeholder: "Іванович", value: "" },
-    { id: "dnarod", label: "Дата народження", placeholder: "01.01.1990", value: "" },
-    { id: "adresa", label: "Адреса реєстрації", placeholder: "м. Київ, вул. Хрещатик, 1, кв. 1", value: "" },
-    { id: "vydana", label: "Довідка видана для", placeholder: "банку / суду / посольства", value: "" },
-  ],
-  "default": [
-    { id: "prizvyshche", label: "Прізвище", placeholder: "Іваненко", value: "" },
-    { id: "imya", label: "Ім'я", placeholder: "Іван", value: "" },
-    { id: "pobatkovi", label: "По батькові", placeholder: "Іванович", value: "" },
-    { id: "dnarod", label: "Дата народження", placeholder: "01.01.1990", value: "" },
-    { id: "adresa", label: "Адреса", placeholder: "м. Київ, вул. Хрещатик, 1", value: "" },
-  ],
+const EMPTY: VytiahFields = {
+  nomervytiah: "",
+  date: "",
+  gromada: "",
+  prizvyshche: "",
+  imya: "",
+  pobatkovi: "",
+  dnarod: "",
+  unzr: "",
+  rnokpp: "",
+  adresa: "",
+  datareg: "",
+  zayavnyk: "",
+  datazapyt: "",
 };
 
-const TEMPLATE_TITLES: Record<string, string> = {
-  "vytiah-registry": "Витяг з реєстру територіальної громади",
-  "dovidka-prozhyvannya": "Довідка про місце проживання",
-  "zayava-zagublennya": "Заява про загублення документа",
-  "dovidka-work": "Довідка з місця роботи",
-  "zayava-diya": "Заява до Дії",
-  "dogovir-kupivli": "Договір купівлі-продажу",
-  "dovirenist": "Довіреність",
-  "zayava-reestraciya": "Заява на реєстрацію ФОП",
+const PLACEHOLDERS: VytiahFields = {
+  nomervytiah: "2023/007497299",
+  date: "18.09.2023 18 год. 56 хв.",
+  gromada: "Харківська територіальна громада",
+  prizvyshche: "Чалий",
+  imya: "Сергій",
+  pobatkovi: "Сергійович",
+  dnarod: "14.01.2007",
+  unzr: "20070114-07150",
+  rnokpp: "3909502612",
+  adresa: "Харківська область, Харківський район, м. Харків, Основ'янський район, вул. Сидоренківська, буд. 48, кв. 5",
+  datareg: "30.01.2007",
+  zayavnyk: "Чалий С. С.",
+  datazapyt: "18.09.2023",
 };
+
+const LABELS: Record<keyof VytiahFields, string> = {
+  nomervytiah: "Номер витягу",
+  date: "Дата та час формування",
+  gromada: "Назва громади",
+  prizvyshche: "Прізвище",
+  imya: "Власне ім'я",
+  pobatkovi: "По батькові (за наявності)",
+  dnarod: "Дата народження",
+  unzr: "УНЗР (за наявності)",
+  rnokpp: "РНОКПП (за наявності)",
+  adresa: "Адреса місця проживання",
+  datareg: "Дата декларування / реєстрації",
+  zayavnyk: "Заявник (ПІБ)",
+  datazapyt: "Дата запиту",
+};
+
+function v(fields: VytiahFields, key: keyof VytiahFields) {
+  return fields[key] || PLACEHOLDERS[key];
+}
+
+/* ---------- Превью документа точно по скриншоту ---------- */
+function VytiahPreview({ fields, forPdf }: { fields: VytiahFields; forPdf?: boolean }) {
+  const s: React.CSSProperties = {
+    fontFamily: "Times New Roman, serif",
+    fontSize: forPdf ? "11.5px" : "11px",
+    color: "#000",
+    background: "#fff",
+    width: forPdf ? "794px" : "100%",
+    padding: forPdf ? "36px 52px" : "20px 24px",
+    boxSizing: "border-box",
+    lineHeight: 1.4,
+  };
+
+  const line: React.CSSProperties = { borderBottom: "1px solid #000", marginBottom: 0 };
+  const lineTop: React.CSSProperties = { borderTop: "1px solid #000" };
+  const bold: React.CSSProperties = { fontWeight: 700 };
+  const center: React.CSSProperties = { textAlign: "center" };
+  const small: React.CSSProperties = { fontSize: "9px", color: "#333" };
+
+  return (
+    <div style={s}>
+      {/* QR-код вверху справа */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "8px" }}>
+        <img
+          src={`https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(v(fields, "nomervytiah"))}`}
+          alt="QR"
+          width={90}
+          height={90}
+          crossOrigin="anonymous"
+          style={{ display: "block" }}
+        />
+      </div>
+
+      {/* Заголовок */}
+      <div style={{ ...center, marginBottom: "10px" }}>
+        <div style={{ ...bold, fontSize: "14px", letterSpacing: "0.5px" }}>ВИТЯГ</div>
+        <div style={{ ...bold, fontSize: "14px", letterSpacing: "0.5px" }}>З РЕЄСТРУ ТЕРИТОРІАЛЬНОЇ ГРОМАДИ</div>
+      </div>
+
+      {/* Вступний текст */}
+      <div style={{ marginBottom: "8px", fontSize: "11px" }}>
+        Відомості про особу надані з відомчої інформаційної системи Державної міграційної служби на підставі відомостей, отриманих від
+      </div>
+
+      {/* Громада */}
+      <div style={{ ...center, ...bold, ...line, paddingBottom: "4px", marginBottom: "2px" }}>
+        {v(fields, "gromada")}
+      </div>
+      <div style={{ ...center, ...small, marginBottom: "8px" }}>назва(и) територіальної(их) громади(и)</div>
+
+      {/* Номер + дата в один рядок */}
+      <div style={{ display: "flex", gap: "24px", marginBottom: "4px", ...lineTop, paddingTop: "4px" }}>
+        <div style={{ flex: 1 }}>
+          <span>Номер витягу: </span>
+          <span style={bold}>{v(fields, "nomervytiah")}</span>
+        </div>
+        <div style={{ flex: 2 }}>
+          <span>Дата та час формування: </span>
+          <span style={bold}>{v(fields, "date")}</span>
+        </div>
+      </div>
+
+      {/* Таблиця полів особи */}
+      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px" }}>
+        <tbody>
+          {(
+            [
+              ["Прізвище", v(fields, "prizvyshche")],
+              ["Власне ім'я", v(fields, "imya")],
+              ["По батькові (за наявності)", v(fields, "pobatkovi")],
+              ["Дата народження", v(fields, "dnarod")],
+              ["УНЗР (за наявності)", v(fields, "unzr")],
+              ["РНОКПП (за наявності)", v(fields, "rnokpp")],
+            ] as [string, string][]
+          ).map(([label, val]) => (
+            <tr key={label} style={{ borderBottom: "1px solid #aaa" }}>
+              <td style={{ padding: "3px 4px 3px 0", width: "42%", color: "#222" }}>{label}</td>
+              <td style={{ padding: "3px 0", fontWeight: 700 }}>{val}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Таблиця адреси */}
+      <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #000", marginBottom: "12px", fontSize: "10px" }}>
+        <thead>
+          <tr>
+            <td colSpan={2} style={{ border: "1px solid #000", padding: "4px 6px", textAlign: "center", verticalAlign: "middle", width: "28%" }}>
+              Дата проведення реєстраційної дії
+            </td>
+            <td style={{ border: "1px solid #000", padding: "4px 6px", textAlign: "center" }} rowSpan={2}>
+              Адреса місця проживання
+            </td>
+            <td style={{ border: "1px solid #000", padding: "4px 6px", textAlign: "center" }} rowSpan={2}>
+              Країна вибуття на постійне проживання
+            </td>
+          </tr>
+          <tr>
+            <td style={{ border: "1px solid #000", padding: "4px 6px", textAlign: "center" }}>
+              Дата декларування /реєстрації
+            </td>
+            <td style={{ border: "1px solid #000", padding: "4px 6px", textAlign: "center" }}>
+              Дата зняття (скасування)
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style={{ border: "1px solid #000", padding: "5px 6px", verticalAlign: "top" }}>{v(fields, "datareg")}</td>
+            <td style={{ border: "1px solid #000", padding: "5px 6px", verticalAlign: "top" }}></td>
+            <td style={{ border: "1px solid #000", padding: "5px 6px", verticalAlign: "top" }}>{v(fields, "adresa")}</td>
+            <td style={{ border: "1px solid #000", padding: "5px 6px", verticalAlign: "top" }}></td>
+          </tr>
+        </tbody>
+      </table>
+
+      {/* Підстава */}
+      <div style={{ marginBottom: "4px" }}>Витяг сформовано на підставі</div>
+      <div style={{ ...center, ...bold, ...line, paddingBottom: "3px", marginBottom: "2px" }}>
+        заява особи {v(fields, "zayavnyk")}
+      </div>
+      <div style={{ ...center, ...small, marginBottom: "6px" }}>
+        (зазначається заява: особи / законного представника / представника / власника (співвласника) житла, уповноваженої особи житла, іпотекодержателя або довірчого власника, прізвище та ініціали особи або дані юридичної особи)
+      </div>
+      <div style={{ marginBottom: "4px" }}>від {v(fields, "datazapyt")}</div>
+      <div style={{ marginBottom: "4px" }}>отриманої за запитом</div>
+
+      {/* ДП ДІЯ */}
+      <div style={{ ...center, ...bold, ...line, paddingBottom: "3px", marginBottom: "2px" }}>
+        Державне підприємство "ДІЯ"
+      </div>
+      <div style={{ ...center, ...small, marginBottom: "8px" }}>(відомості про суб'єкта запиту)</div>
+
+      {/* Підпис */}
+      <div style={{ ...small, marginTop: "6px" }}>Витяг підписано КЕП ДМС</div>
+    </div>
+  );
+}
 
 export default function EditorPage({ selectedTemplate }: EditorPageProps) {
   const templateId = selectedTemplate || "vytiah-registry";
-  const templateTitle = TEMPLATE_TITLES[templateId] || "Новий документ";
-  const initialFields = (TEMPLATE_FIELDS[templateId] || TEMPLATE_FIELDS["default"]).map((f) => ({ ...f }));
 
-  const [fields, setFields] = useState<Field[]>(initialFields);
+  const [fields, setFields] = useState<VytiahFields>({ ...EMPTY });
   const [uploadedPdf, setUploadedPdf] = useState<File | null>(null);
-  const [customTitle, setCustomTitle] = useState("");
   const [generating, setGenerating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const updateField = (id: string, value: string) => {
-    setFields((prev) => prev.map((f) => (f.id === id ? { ...f, value } : f)));
-  };
-
-  const addCustomField = () => {
-    const id = `custom_${Date.now()}`;
-    setFields((prev) => [...prev, { id, label: "Нове поле", placeholder: "Введіть значення", value: "" }]);
-  };
-
-  const removeField = (id: string) => {
-    setFields((prev) => prev.filter((f) => f.id !== id));
-  };
+  const update = (key: keyof VytiahFields, val: string) =>
+    setFields((prev) => ({ ...prev, [key]: val }));
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type === "application/pdf") {
       setUploadedPdf(file);
-      toast({ title: "PDF загружен", description: file.name });
+      toast({ title: "PDF завантажено", description: file.name });
     } else {
-      toast({ title: "Ошибка", description: "Выберите файл в формате PDF", variant: "destructive" });
+      toast({ title: "Помилка", description: "Виберіть файл PDF", variant: "destructive" });
     }
   };
 
@@ -100,12 +247,13 @@ export default function EditorPage({ selectedTemplate }: EditorPageProps) {
     if (!previewRef.current) return;
     setGenerating(true);
     try {
-      const element = previewRef.current;
-      const canvas = await html2canvas(element, {
+      const canvas = await html2canvas(previewRef.current, {
         scale: 2,
         useCORS: true,
+        allowTaint: true,
         backgroundColor: "#ffffff",
         logging: false,
+        imageTimeout: 8000,
       });
 
       const imgData = canvas.toDataURL("image/png");
@@ -113,7 +261,7 @@ export default function EditorPage({ selectedTemplate }: EditorPageProps) {
 
       const pageW = 210;
       const pageH = 297;
-      const margin = 10;
+      const margin = 8;
       const imgW = pageW - margin * 2;
       const imgH = (canvas.height * imgW) / canvas.width;
       const availH = pageH - margin * 2;
@@ -121,38 +269,40 @@ export default function EditorPage({ selectedTemplate }: EditorPageProps) {
       if (imgH <= availH) {
         pdf.addImage(imgData, "PNG", margin, margin, imgW, imgH);
       } else {
-        let renderedH = 0;
-        while (renderedH < imgH) {
-          const sliceH = Math.min(availH, imgH - renderedH);
-          if (renderedH > 0) pdf.addPage();
-          pdf.addImage(imgData, "PNG", margin, margin - renderedH, imgW, imgH);
-          renderedH += sliceH;
-          // clip
+        // розбиваємо на сторінки через clip
+        let offsetY = 0;
+        while (offsetY < imgH) {
+          if (offsetY > 0) pdf.addPage();
+          pdf.addImage(imgData, "PNG", margin, margin - offsetY, imgW, imgH);
+          // белый прямоугольник снизу, чтобы закрыть остаток
           pdf.setFillColor(255, 255, 255);
-          pdf.rect(0, margin + sliceH, pageW, pageH, "F");
+          pdf.rect(0, margin + availH, pageW, pageH, "F");
+          offsetY += availH;
         }
       }
 
-      const filename = (customTitle || templateTitle).substring(0, 40).replace(/\s+/g, "_") + ".pdf";
-      pdf.save(filename);
+      pdf.save("Витяг_з_реєстру_територіальної_громади.pdf");
       toast({ title: "PDF готовий!", description: "Документ збережено" });
-    } catch {
+    } catch (e) {
+      console.error(e);
       toast({ title: "Помилка генерації", variant: "destructive" });
     }
     setGenerating(false);
   };
 
   const clearAll = () => {
-    setFields(initialFields.map((f) => ({ ...f, value: "" })));
+    setFields({ ...EMPTY });
     toast({ title: "Поля очищено" });
   };
 
+  const fieldKeys = Object.keys(LABELS) as (keyof VytiahFields)[];
+
   return (
-    <div className="container max-w-5xl mx-auto px-4 py-8">
+    <div className="container max-w-6xl mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold">{templateTitle}</h1>
-          <p className="text-sm text-muted-foreground mt-1">Заповніть поля та завантажте готовий PDF</p>
+          <h1 className="text-2xl font-bold">Витяг з реєстру територіальної громади</h1>
+          <p className="text-sm text-muted-foreground mt-1">Заповніть поля — документ оновлюється в реальному часі</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={clearAll}>
@@ -166,7 +316,7 @@ export default function EditorPage({ selectedTemplate }: EditorPageProps) {
         </div>
       </div>
 
-      <Tabs defaultValue="template">
+      <Tabs defaultValue={templateId === "vytiah-registry" ? "template" : "upload"}>
         <TabsList className="mb-4">
           <TabsTrigger value="template">
             <Icon name="FileText" size={15} />
@@ -178,90 +328,51 @@ export default function EditorPage({ selectedTemplate }: EditorPageProps) {
           </TabsTrigger>
         </TabsList>
 
-        {/* Template mode */}
+        {/* Шаблон витягу */}
         <TabsContent value="template">
           <div className="grid lg:grid-cols-5 gap-6">
-            {/* Form */}
-            <div className="lg:col-span-3 space-y-4">
+            {/* Форма */}
+            <div className="lg:col-span-2 space-y-3">
               <Card>
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-2">
                   <CardTitle className="text-base">Дані документа</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label className="text-xs mb-1 block">Назва документа (необов'язково)</Label>
-                    <Input
-                      placeholder={templateTitle}
-                      value={customTitle}
-                      onChange={(e) => setCustomTitle(e.target.value)}
-                    />
-                  </div>
-                  {fields.map((field) => (
-                    <div key={field.id} className="flex gap-2 items-start">
-                      <div className="flex-1">
-                        <Label className="text-xs mb-1 block text-muted-foreground">{field.label}</Label>
-                        <Input
-                          placeholder={field.placeholder}
-                          value={field.value}
-                          onChange={(e) => updateField(field.id, e.target.value)}
-                        />
-                      </div>
-                      {field.id.startsWith("custom_") && (
-                        <button
-                          onClick={() => removeField(field.id)}
-                          className="mt-6 text-muted-foreground hover:text-destructive transition-colors"
-                        >
-                          <Icon name="X" size={16} />
-                        </button>
-                      )}
+                <CardContent className="space-y-3">
+                  {fieldKeys.map((key) => (
+                    <div key={key}>
+                      <Label className="text-xs mb-1 block text-muted-foreground">{LABELS[key]}</Label>
+                      <Input
+                        placeholder={PLACEHOLDERS[key]}
+                        value={fields[key]}
+                        onChange={(e) => update(key, e.target.value)}
+                      />
                     </div>
                   ))}
-                  <Button variant="outline" size="sm" onClick={addCustomField} className="w-full">
-                    <Icon name="Plus" size={15} />
-                    Додати поле
-                  </Button>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Preview */}
-            <div className="lg:col-span-2">
-              <Card className="sticky top-20">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Попередній перегляд</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div
-                    ref={previewRef}
-                    className="bg-white border rounded-md p-6 min-h-64 shadow-inner"
-                    style={{ fontFamily: "'Golos Text', sans-serif", fontSize: "13px", color: "#111" }}
-                  >
-                    <div style={{ textAlign: "center", fontWeight: 700, fontSize: "14px", marginBottom: "12px", paddingBottom: "10px", borderBottom: "2px solid #1e3c78" }}>
-                      {(customTitle || templateTitle).toUpperCase()}
-                    </div>
-                    {fields.map((f) => (
-                      <div key={f.id} style={{ marginBottom: "10px", paddingBottom: "8px", borderBottom: "1px dashed #ddd" }}>
-                        <div style={{ fontSize: "11px", color: "#666", marginBottom: "2px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{f.label}</div>
-                        <div style={{ fontWeight: 500, color: f.value ? "#111" : "#bbb", fontStyle: f.value ? "normal" : "italic" }}>
-                          {f.value || "не заповнено"}
-                        </div>
-                      </div>
-                    ))}
-                    <div style={{ marginTop: "16px", fontSize: "11px", color: "#aaa", textAlign: "right" }}>
-                      Сформовано: {new Date().toLocaleDateString("uk-UA")}
-                    </div>
-                  </div>
-                  <Button className="w-full mt-4" onClick={generatePdf} disabled={generating}>
-                    <Icon name="FileDown" size={16} />
-                    {generating ? "Генерація PDF..." : "Згенерувати та скачати PDF"}
+            {/* Превью */}
+            <div className="lg:col-span-3">
+              <div className="sticky top-20">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-muted-foreground">Попередній перегляд</p>
+                  <Button size="sm" onClick={generatePdf} disabled={generating}>
+                    <Icon name="FileDown" size={15} />
+                    {generating ? "Генерація..." : "Скачати PDF"}
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="border rounded-lg overflow-hidden bg-white shadow-sm overflow-x-auto">
+                  <div ref={previewRef} className="origin-top-left" style={{ minWidth: "560px" }}>
+                    <VytiahPreview fields={fields} />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </TabsContent>
 
-        {/* Upload mode */}
+        {/* Свій PDF */}
         <TabsContent value="upload">
           <Card>
             <CardContent className="p-8">
@@ -281,36 +392,11 @@ export default function EditorPage({ selectedTemplate }: EditorPageProps) {
                   </div>
                 )}
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="application/pdf"
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-
+              <input ref={fileInputRef} type="file" accept="application/pdf" className="hidden" onChange={handleFileUpload} />
               {uploadedPdf && (
-                <div className="mt-6 space-y-4">
-                  <p className="font-medium text-sm">Заповніть поля для вашого документа:</p>
-                  {fields.map((field) => (
-                    <div key={field.id}>
-                      <Label className="text-xs mb-1 block text-muted-foreground">{field.label}</Label>
-                      <Input
-                        placeholder={field.placeholder}
-                        value={field.value}
-                        onChange={(e) => updateField(field.id, e.target.value)}
-                      />
-                    </div>
-                  ))}
-                  <Button onClick={addCustomField} variant="outline" size="sm">
-                    <Icon name="Plus" size={15} />
-                    Додати поле
-                  </Button>
-                  <Button className="w-full mt-2" onClick={generatePdf} disabled={generating}>
-                    <Icon name="FileDown" size={16} />
-                    {generating ? "Генерація..." : "Скачати заповнений PDF"}
-                  </Button>
-                </div>
+                <p className="text-sm text-muted-foreground text-center mt-4">
+                  Редагування завантажених PDF буде доступне в наступній версії.
+                </p>
               )}
             </CardContent>
           </Card>
