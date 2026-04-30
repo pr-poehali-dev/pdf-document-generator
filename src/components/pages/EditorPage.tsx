@@ -112,7 +112,7 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
       </div>
 
       {/* Таблиця особи */}
-      <table style={{ width: "100%", borderCollapse: "collapse", borderBottom: "1px solid #000", marginBottom: "10px", fontSize: "11.5px" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px", fontSize: "11.5px" }}>
         <tbody>
           {([
             ["Прізвище", f("prizvyshche")],
@@ -121,10 +121,10 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
             ["Дата народження", f("dnarod")],
             ["УНЗР (за наявності)", f("unzr")],
             ["РНОКПП (за наявності)", f("rnokpp")],
-          ] as [string, string][]).map(([label, val]) => (
+          ] as [string, string][]).map(([label, val], idx, arr) => (
             <tr key={label}>
               <td style={{ padding: "1px 6px 1px 4px", width: "43%", color: "#222" }}>{label}</td>
-              <td style={{ padding: "1px 0 1px 8px", fontWeight: 700, borderBottom: "1px solid #000" }}>{val}</td>
+              <td style={{ padding: "1px 0 1px 8px", fontWeight: 700, borderBottom: idx < arr.length - 1 ? "1px solid #000" : "none" }}>{val}</td>
             </tr>
           ))}
         </tbody>
