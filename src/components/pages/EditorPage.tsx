@@ -70,7 +70,7 @@ const LABELS: Record<keyof VytiahFields, string> = {
 function DocPreview({ fields }: { fields: VytiahFields }) {
   const f = (key: keyof VytiahFields) => fields[key] || "";
   return (
-    <div style={{ width: "794px", background: "#fff", padding: "40px 60px", fontFamily: "Times New Roman, serif", fontSize: "12px", color: "#000", boxSizing: "border-box", lineHeight: "1.45" }}>
+    <div style={{ width: "794px", height: "1123px", background: "#fff", padding: "40px 60px", fontFamily: "Times New Roman, serif", fontSize: "12px", color: "#000", boxSizing: "border-box", lineHeight: "1.45" }}>
 
       {/* QR вверху справа */}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "6px" }}>
@@ -277,8 +277,18 @@ export default function EditorPage({ selectedTemplate: _selectedTemplate }: Edit
         {/* Видимый превью */}
         <div className="lg:col-span-3">
           <p className="text-sm font-medium text-muted-foreground mb-2">Попередній перегляд</p>
-          <div className="border rounded-lg bg-white shadow-sm overflow-hidden">
-            <div style={{ transform: "scale(0.56)", transformOrigin: "top left", width: "794px", pointerEvents: "none", marginBottom: `calc((794px * 0.56 - 794px) * 0.56)` }}>
+          {/* А4: 794×1123px, масштаб подбирается под ширину контейнера */}
+          <div className="border rounded-lg bg-white shadow-sm overflow-hidden" style={{ aspectRatio: "794/1123", position: "relative" }}>
+            <div style={{ position: "absolute", top: 0, left: 0, width: "794px", height: "1123px", transformOrigin: "top left", transform: "scale(var(--preview-scale, 0.5))", pointerEvents: "none" }}
+              ref={(el) => {
+                if (!el) return;
+                const parent = el.parentElement;
+                if (!parent) return;
+                const scale = parent.offsetWidth / 794;
+                el.style.setProperty("--preview-scale", String(scale));
+                el.style.transform = `scale(${scale})`;
+              }}
+            >
               <DocPreview fields={fields} />
             </div>
           </div>
