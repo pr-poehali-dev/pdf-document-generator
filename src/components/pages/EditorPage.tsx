@@ -70,7 +70,7 @@ const LABELS: Record<keyof VytiahFields, string> = {
 function DocPreview({ fields }: { fields: VytiahFields }) {
   const f = (key: keyof VytiahFields) => fields[key] || "";
   return (
-    <div style={{ width: "794px", height: "1123px", background: "#fff", padding: "50px 70px", fontFamily: "Times New Roman, serif", fontSize: "14px", color: "#000", boxSizing: "border-box", lineHeight: "1.6" }}>
+    <div style={{ width: "794px", height: "1123px", background: "#fff", padding: "36px 56px", fontFamily: "Times New Roman, serif", fontSize: "16px", color: "#000", boxSizing: "border-box", lineHeight: "1.55" }}>
 
       {/* QR вверху справа */}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "6px" }}>
@@ -81,27 +81,27 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
       </div>
 
       {/* Заголовок */}
-      <div style={{ textAlign: "center", marginBottom: "12px" }}>
-        <div style={{ fontWeight: 700, fontSize: "14px" }}>ВИТЯГ</div>
-        <div style={{ fontWeight: 700, fontSize: "14px" }}>З РЕЄСТРУ ТЕРИТОРІАЛЬНОЇ ГРОМАДИ</div>
+      <div style={{ textAlign: "center", marginBottom: "14px" }}>
+        <div style={{ fontWeight: 700, fontSize: "18px" }}>ВИТЯГ</div>
+        <div style={{ fontWeight: 700, fontSize: "18px" }}>З РЕЄСТРУ ТЕРИТОРІАЛЬНОЇ ГРОМАДИ</div>
       </div>
 
       {/* Вступний текст */}
-      <div style={{ marginBottom: "8px", fontSize: "11.5px", textIndent: "24px" }}>
+      <div style={{ marginBottom: "10px", fontSize: "14px", textIndent: "28px" }}>
         Відомості про особу надані з відомчої інформаційної системи Державної міграційної служби на підставі відомостей, отриманих від
       </div>
 
       {/* Назва громади */}
-      <div style={{ textAlign: "center", fontWeight: 700, fontSize: "12px", marginBottom: "1px" }}>
+      <div style={{ textAlign: "center", fontWeight: 700, fontSize: "15px", marginBottom: "2px" }}>
         {f("gromada")}
       </div>
-      <div style={{ borderTop: "1px solid #000", textAlign: "center", fontSize: "9px", color: "#333", paddingTop: "1px", marginBottom: "6px" }}>
+      <div style={{ borderTop: "1px solid #000", textAlign: "center", fontSize: "11px", color: "#333", paddingTop: "2px", marginBottom: "8px" }}>
         назва(и) територіальної(их) громади(и)
       </div>
 
       {/* Номер + дата */}
-      <div style={{ paddingTop: "3px", marginBottom: "0" }}>
-        <div style={{ marginBottom: "2px" }}>
+      <div style={{ paddingTop: "4px", marginBottom: "4px", fontSize: "14px" }}>
+        <div style={{ marginBottom: "3px" }}>
           <span>Номер витягу: </span>
           <span style={{ fontWeight: 700 }}>{f("nomervytiah")}</span>
         </div>
@@ -112,7 +112,7 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
       </div>
 
       {/* Таблиця особи */}
-      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px", fontSize: "11.5px" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "14px", fontSize: "14px" }}>
         <tbody>
           {([
             ["Прізвище", f("prizvyshche")],
@@ -123,15 +123,15 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
             ["РНОКПП (за наявності)", f("rnokpp")],
           ] as [string, string][]).map(([label, val], idx, arr) => (
             <tr key={label}>
-              <td style={{ padding: "1px 6px 1px 4px", width: "43%", color: "#222" }}>{label}</td>
-              <td style={{ padding: "1px 0 1px 8px", fontWeight: 700, borderBottom: "1px solid #000" }}>{val}</td>
+              <td style={{ padding: "3px 6px 3px 4px", width: "43%", color: "#222" }}>{label}</td>
+              <td style={{ padding: "3px 0 3px 8px", fontWeight: 700, borderBottom: "1px solid #000" }}>{val}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
       {/* Таблиця адреси */}
-      <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #000", marginBottom: "14px", fontSize: "10.5px" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #000", marginBottom: "16px", fontSize: "13px" }}>
         <thead>
           <tr>
             <td colSpan={2} style={{ border: "1px solid #000", padding: "4px 6px", textAlign: "center", width: "26%" }}>
@@ -160,26 +160,26 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
       </table>
 
       {/* Підстава */}
-      <div style={{ marginBottom: "4px", fontSize: "11.5px" }}>Витяг сформовано на підставі</div>
-      <div style={{ textAlign: "center", fontWeight: 700, borderBottom: "1px solid #000", paddingBottom: "2px", marginBottom: "3px", fontSize: "11.5px" }}>
+      <div style={{ marginBottom: "6px", fontSize: "14px" }}>Витяг сформовано на підставі</div>
+      <div style={{ textAlign: "center", fontWeight: 700, borderBottom: "1px solid #000", paddingBottom: "3px", marginBottom: "4px", fontSize: "14px" }}>
         заява особи {f("zayavnyk")}
       </div>
-      <div style={{ textAlign: "center", fontSize: "9px", color: "#333", marginBottom: "6px" }}>
+      <div style={{ textAlign: "center", fontSize: "11px", color: "#333", marginBottom: "8px" }}>
         (зазначається заява: особи / законного представника / представника / власника (співвласника) житла, уповноваженої особи житла, іпотекодержателя або довірчого власника, прізвище та ініціали особи або дані юридичної особи)
       </div>
-      <div style={{ fontSize: "11.5px", marginBottom: "3px" }}>від {f("datazapyt")}</div>
-      <div style={{ fontSize: "11.5px", marginBottom: "6px" }}>отриманої за запитом</div>
+      <div style={{ fontSize: "14px", marginBottom: "4px" }}>від {f("datazapyt")}</div>
+      <div style={{ fontSize: "14px", marginBottom: "10px" }}>отриманої за запитом</div>
 
       {/* ДП ДІЯ */}
-      <div style={{ textAlign: "center", fontWeight: 700, borderBottom: "1px solid #000", paddingBottom: "2px", marginBottom: "3px", fontSize: "12px" }}>
+      <div style={{ textAlign: "center", fontWeight: 700, borderBottom: "1px solid #000", paddingBottom: "3px", marginBottom: "4px", fontSize: "15px" }}>
         Державне підприємство "ДІЯ"
       </div>
-      <div style={{ textAlign: "center", fontSize: "9px", color: "#333", marginBottom: "12px" }}>
+      <div style={{ textAlign: "center", fontSize: "11px", color: "#333", marginBottom: "16px" }}>
         (відомості про суб'єкта запиту)
       </div>
 
       {/* Підпис */}
-      <div style={{ fontSize: "9px", color: "#333" }}>Витяг підписано КЕП ДМС</div>
+      <div style={{ fontSize: "11px", color: "#333" }}>Витяг підписано КЕП ДМС</div>
     </div>
   );
 }
