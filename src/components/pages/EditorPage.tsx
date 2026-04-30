@@ -157,8 +157,8 @@ function VytiahPreview({ fields, forPdf }: { fields: VytiahFields; forPdf?: bool
             ] as [string, string][]
           ).map(([label, val]) => (
             <tr key={label} style={{ borderBottom: "1px solid #000" }}>
-              <td style={{ padding: "4px 8px 4px 0", width: "42%", color: "#000" }}>{label}</td>
-              <td style={{ padding: "4px 0", fontWeight: 700, borderLeft: "1px solid #000", paddingLeft: "8px" }}>{val}</td>
+              <td style={{ padding: "3px 8px 3px 4px", width: "44%", color: "#000", fontStyle: "italic" }}>{label}</td>
+              <td style={{ padding: "3px 0 3px 12px", fontWeight: 700 }}>{val}</td>
             </tr>
           ))}
         </tbody>
