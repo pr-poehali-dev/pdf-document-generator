@@ -75,8 +75,8 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
       {/* QR вверху справа */}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "6px" }}>
         <img
-          src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https%3A%2F%2Frtg-cert-dmsu-gov-ua.site%2F"
-          alt="QR" width={100} height={100} crossOrigin="anonymous"
+          src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Frtg-cert-dmsu-gov-ua.site%2F"
+          alt="QR" width={160} height={160} crossOrigin="anonymous"
         />
       </div>
 
