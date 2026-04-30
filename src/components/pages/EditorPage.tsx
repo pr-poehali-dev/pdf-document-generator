@@ -155,10 +155,10 @@ function VytiahPreview({ fields, forPdf }: { fields: VytiahFields; forPdf?: bool
               ["УНЗР (за наявності)", v(fields, "unzr")],
               ["РНОКПП (за наявності)", v(fields, "rnokpp")],
             ] as [string, string][]
-          ).map(([label, val], idx, arr) => (
-            <tr key={label} style={{ borderBottom: idx < arr.length - 1 ? "1px solid #ccc" : "none" }}>
-              <td style={{ padding: "4px 4px 4px 4px", width: "42%", color: "#333", fontWeight: 400 }}>{label}</td>
-              <td style={{ padding: "4px 0 4px 8px", fontWeight: 700, color: "#000" }}>{val}</td>
+          ).map(([label, val]) => (
+            <tr key={label}>
+              <td style={{ padding: "3px 4px 3px 4px", width: "42%", color: "#333", fontWeight: 400 }}>{label}</td>
+              <td style={{ padding: "3px 0 3px 8px", fontWeight: 700, color: "#000" }}>{val}</td>
             </tr>
           ))}
         </tbody>
