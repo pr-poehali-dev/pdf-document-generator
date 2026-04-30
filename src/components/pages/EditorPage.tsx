@@ -70,7 +70,7 @@ const LABELS: Record<keyof VytiahFields, string> = {
 function DocPreview({ fields }: { fields: VytiahFields }) {
   const f = (key: keyof VytiahFields) => fields[key] || "";
   return (
-    <div style={{ width: "794px", height: "1123px", background: "#fff", padding: "36px 56px", fontFamily: "Times New Roman, serif", fontSize: "16px", color: "#000", boxSizing: "border-box", lineHeight: "1.55" }}>
+    <div style={{ width: "794px", height: "1123px", background: "#fff", padding: "30px 52px", fontFamily: "Times New Roman, serif", fontSize: "17.5px", color: "#000", boxSizing: "border-box", lineHeight: "1.7" }}>
 
       {/* QR вверху справа */}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "6px" }}>
