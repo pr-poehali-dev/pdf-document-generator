@@ -144,7 +144,7 @@ function VytiahPreview({ fields, forPdf }: { fields: VytiahFields; forPdf?: bool
       </div>
 
       {/* Таблиця полів особи */}
-      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: "10px", borderTop: "1px solid #000" }}>
         <tbody>
           {(
             [
@@ -156,9 +156,9 @@ function VytiahPreview({ fields, forPdf }: { fields: VytiahFields; forPdf?: bool
               ["РНОКПП (за наявності)", v(fields, "rnokpp")],
             ] as [string, string][]
           ).map(([label, val]) => (
-            <tr key={label} style={{ borderBottom: "1px solid #aaa" }}>
-              <td style={{ padding: "3px 4px 3px 0", width: "42%", color: "#222" }}>{label}</td>
-              <td style={{ padding: "3px 0", fontWeight: 700 }}>{val}</td>
+            <tr key={label} style={{ borderBottom: "1px solid #000" }}>
+              <td style={{ padding: "4px 8px 4px 0", width: "42%", color: "#000" }}>{label}</td>
+              <td style={{ padding: "4px 0", fontWeight: 700, borderLeft: "1px solid #000", paddingLeft: "8px" }}>{val}</td>
             </tr>
           ))}
         </tbody>
