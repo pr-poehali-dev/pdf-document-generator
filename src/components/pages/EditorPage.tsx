@@ -221,7 +221,7 @@ export default function EditorPage({ selectedTemplate: _selectedTemplate }: Edit
         }
       }
       pdf.save("Витяг_з_реєстру_територіальної_громади.pdf");
-      toast({ title: "PDF готовий!", description: "Документ збережено" });
+      toast({ title: "PDF готовий!", description: "Документ збережено у папку «Завантаження» на вашому комп'ютері" });
     } catch (e) {
       console.error(e);
       toast({ title: "Помилка генерації", variant: "destructive" });
