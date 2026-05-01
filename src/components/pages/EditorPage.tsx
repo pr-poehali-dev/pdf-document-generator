@@ -123,8 +123,8 @@ function DocPreview({ fields }: { fields: VytiahFields }) {
             ["РНОКПП (за наявності)", f("rnokpp")],
           ] as [string, string][]).map(([label, val], idx, arr) => (
             <tr key={label}>
-              <td style={{ padding: "3px 6px 3px 4px", width: "52%", color: "#888", fontSize: "14px", whiteSpace: "nowrap" }}>{label}</td>
-              <td style={{ padding: "3px 0 3px 8px", fontWeight: 700, color: "#888", borderBottom: "1px solid #000" }}>{val}</td>
+              <td style={{ padding: "0px 6px 0px 4px", width: "40%", color: "#888", fontSize: "13px", lineHeight: "2.2" }}>{label}</td>
+              <td style={{ padding: "0px 0 0px 8px", fontWeight: 700, color: "#888", borderBottom: "1px solid #000", verticalAlign: "bottom", lineHeight: "2.2" }}>{val}</td>
             </tr>
           ))}
         </tbody>
