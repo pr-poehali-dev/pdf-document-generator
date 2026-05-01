@@ -222,14 +222,14 @@ export default function EditorPage({ selectedTemplate: _selectedTemplate }: Edit
           offsetY += availH;
         }
       }
+      pdf.save("Витяг_з_реєстру_територіальної_громади.pdf");
+      toast({ title: "PDF готовий!", description: "Документ збережено у «Файли»" });
       const pdfBase64 = pdf.output("datauristring").split(",")[1];
-      await fetch(FILES_URL, {
+      fetch(FILES_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pdf: pdfBase64, name: "\u0412\u0438\u0442\u044f\u0433_\u0437_\u0440\u0435\u0454\u0441\u0442\u0440\u0443_\u0442\u0435\u0440\u0438\u0442\u043e\u0440\u0456\u0430\u043b\u044c\u043d\u043e\u0457_\u0433\u0440\u043e\u043c\u0430\u0434\u0438" }),
-      });
-      pdf.save("Витяг_з_реєстру_територіальної_громади.pdf");
-      toast({ title: "PDF готовий!", description: "Документ збережено у «Файли» та завантажено на пристрій" });
+        body: JSON.stringify({ pdf: pdfBase64, name: "Витяг_з_реєстру_територіальної_громади" }),
+      }).catch(() => {});
     } catch (e) {
       console.error(e);
       toast({ title: "Помилка генерації", variant: "destructive" });
