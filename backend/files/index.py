@@ -13,6 +13,16 @@ s3 = boto3.client(
 BUCKET = 'files'
 PREFIX = 'pdfs/'
 
+def get_bucket_name():
+    try:
+        resp = s3.list_buckets()
+        buckets = [b['Name'] for b in resp.get('Buckets', [])]
+        print(f"Available buckets: {buckets}")
+        return buckets[0] if buckets else BUCKET
+    except Exception as e:
+        print(f"list_buckets error: {e}")
+        return BUCKET
+
 CORS = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -28,6 +38,7 @@ def handler(event: dict, context) -> dict:
     method = event.get('httpMethod', 'GET')
 
     if method == 'POST':
+        bucket = get_bucket_name()
         raw_body = event.get('body') or '{}'
         body = json.loads(raw_body) if isinstance(raw_body, str) else raw_body
         print(f"POST received, body keys: {list(body.keys()) if isinstance(body, dict) else 'not dict'}, pdf length: {len(body.get('pdf',''))}")
@@ -40,10 +51,9 @@ def handler(event: dict, context) -> dict:
         timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
         key = f"{PREFIX}{timestamp}_{name}.pdf"
 
-        s3.put_object(Bucket=BUCKET, Key=key, Body=pdf_bytes, ContentType='application/pdf')
-        print(f"Saved to S3: {key}, size: {len(pdf_bytes)} bytes")
-        # Verify immediately
-        check = s3.list_objects_v2(Bucket=BUCKET, Prefix=PREFIX)
+        s3.put_object(Bucket=bucket, Key=key, Body=pdf_bytes, ContentType='application/pdf')
+        print(f"Saved to S3 bucket={bucket}: {key}, size: {len(pdf_bytes)} bytes")
+        check = s3.list_objects_v2(Bucket=bucket, Prefix=PREFIX)
         print(f"Verify after save: KeyCount={check.get('KeyCount')} keys={[o['Key'] for o in check.get('Contents', [])]}")
 
         access_key = os.environ['AWS_ACCESS_KEY_ID']
@@ -56,15 +66,17 @@ def handler(event: dict, context) -> dict:
         }
 
     if method == 'GET':
-        response = s3.list_objects_v2(Bucket=BUCKET, Prefix=PREFIX)
+        bucket = get_bucket_name()
+        response = s3.list_objects_v2(Bucket=bucket, Prefix=PREFIX)
         all_keys = [o['Key'] for o in response.get('Contents', [])]
-        print(f"LIST S3 bucket={BUCKET} prefix={PREFIX} KeyCount={response.get('KeyCount')} IsTruncated={response.get('IsTruncated')} keys={all_keys}")
+        print(f"LIST S3 bucket={bucket} prefix={PREFIX} KeyCount={response.get('KeyCount')} IsTruncated={response.get('IsTruncated')} keys={all_keys}")
         files = []
         access_key = os.environ['AWS_ACCESS_KEY_ID']
         for obj in response.get('Contents', []):
             key = obj['Key']
             filename = key.replace(PREFIX, '')
             url = f"https://cdn.poehali.dev/projects/{access_key}/bucket/{key}"
+            print(f"File URL: {url}")
             files.append({
                 'name': filename,
                 'url': url,
