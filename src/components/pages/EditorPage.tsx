@@ -226,8 +226,7 @@ export default function EditorPage({ selectedTemplate: _selectedTemplate }: Edit
           offsetY += availH;
         }
       }
-      pdf.save("Витяг_з_реєстру_територіальної_громади.pdf");
-      toast({ title: "PDF готовий!", description: "Документ збережено у «Файли»" });
+      toast({ title: "PDF готовий!", description: "Документ збережено у розділі «Файли»" });
       const pdfBase64 = pdf.output("datauristring").split(",")[1];
       fetch(FILES_URL, {
         method: "POST",
