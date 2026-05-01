@@ -16,10 +16,11 @@ export default function FilesPage() {
 
   useEffect(() => {
     fetch(FILES_URL)
-      .then((r) => r.json())
-      .then((data) => {
-        const parsed = typeof data === "string" ? JSON.parse(data) : data;
-        setFiles((parsed.files as FileItem[]) || []);
+      .then((r) => r.text())
+      .then((text) => {
+        const data = JSON.parse(text);
+        const inner = typeof data === "string" ? JSON.parse(data) : data;
+        setFiles((inner.files as FileItem[]) || []);
       })
       .finally(() => setLoading(false));
   }, []);
