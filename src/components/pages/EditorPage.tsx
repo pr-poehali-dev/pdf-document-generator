@@ -205,22 +205,22 @@ export default function EditorPage({ selectedTemplate: _selectedTemplate }: Edit
     setGenerating(true);
     try {
       const canvas = await html2canvas(previewRef.current, {
-        scale: 2, useCORS: true, allowTaint: true,
+        scale: 1, useCORS: true, allowTaint: true,
         backgroundColor: "#ffffff", logging: false, imageTimeout: 8000,
       });
-      const imgData = canvas.toDataURL("image/png");
+      const imgData = canvas.toDataURL("image/jpeg", 0.85);
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const pageW = 210, pageH = 297, margin = 8;
       const imgW = pageW - margin * 2;
       const imgH = (canvas.height * imgW) / canvas.width;
       const availH = pageH - margin * 2;
       if (imgH <= availH) {
-        pdf.addImage(imgData, "PNG", margin, margin, imgW, imgH);
+        pdf.addImage(imgData, "JPEG", margin, margin, imgW, imgH);
       } else {
         let offsetY = 0;
         while (offsetY < imgH) {
           if (offsetY > 0) pdf.addPage();
-          pdf.addImage(imgData, "PNG", margin, margin - offsetY, imgW, imgH);
+          pdf.addImage(imgData, "JPEG", margin, margin - offsetY, imgW, imgH);
           pdf.setFillColor(255, 255, 255);
           pdf.rect(0, margin + availH, pageW, pageH, "F");
           offsetY += availH;
@@ -232,7 +232,7 @@ export default function EditorPage({ selectedTemplate: _selectedTemplate }: Edit
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pdf: pdfBase64, name: "Витяг_з_реєстру_територіальної_громади" }),
-      }).catch(() => {});
+      }).catch((err) => console.error("Upload error:", err));
     } catch (e) {
       console.error(e);
       toast({ title: "Помилка генерації", variant: "destructive" });
