@@ -42,6 +42,9 @@ def handler(event: dict, context) -> dict:
 
         s3.put_object(Bucket=BUCKET, Key=key, Body=pdf_bytes, ContentType='application/pdf')
         print(f"Saved to S3: {key}, size: {len(pdf_bytes)} bytes")
+        # Verify immediately
+        check = s3.list_objects_v2(Bucket=BUCKET, Prefix=PREFIX)
+        print(f"Verify after save: KeyCount={check.get('KeyCount')} keys={[o['Key'] for o in check.get('Contents', [])]}")
 
         access_key = os.environ['AWS_ACCESS_KEY_ID']
         url = f"https://cdn.poehali.dev/projects/{access_key}/bucket/{key}"
@@ -54,6 +57,8 @@ def handler(event: dict, context) -> dict:
 
     if method == 'GET':
         response = s3.list_objects_v2(Bucket=BUCKET, Prefix=PREFIX)
+        all_keys = [o['Key'] for o in response.get('Contents', [])]
+        print(f"LIST S3 bucket={BUCKET} prefix={PREFIX} KeyCount={response.get('KeyCount')} IsTruncated={response.get('IsTruncated')} keys={all_keys}")
         files = []
         access_key = os.environ['AWS_ACCESS_KEY_ID']
         for obj in response.get('Contents', []):
