@@ -1,29 +1,7 @@
 import json
 import os
-import base64
-import boto3
+import psycopg2
 from datetime import datetime
-
-s3 = boto3.client(
-    's3',
-    endpoint_url='https://bucket.poehali.dev',
-    aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
-    aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
-    region_name='us-east-1',
-    config=boto3.session.Config(signature_version='s3v4', s3={'addressing_style': 'path'}),
-)
-BUCKET = 'files'
-PREFIX = 'pdfs/'
-
-def get_bucket_name():
-    try:
-        resp = s3.list_buckets()
-        buckets = [b['Name'] for b in resp.get('Buckets', [])]
-        print(f"Available buckets: {buckets}")
-        return buckets[0] if buckets else BUCKET
-    except Exception as e:
-        print(f"list_buckets error: {e}")
-        return BUCKET
 
 CORS = {
     'Access-Control-Allow-Origin': '*',
@@ -31,65 +9,75 @@ CORS = {
     'Access-Control-Allow-Headers': 'Content-Type',
 }
 
+def get_conn():
+    return psycopg2.connect(os.environ['DATABASE_URL'])
+
 
 def handler(event: dict, context) -> dict:
-    """Загрузка PDF в S3 и получение списка файлов"""
+    """Сохранение PDF в БД и получение списка файлов"""
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': {**CORS, 'Access-Control-Max-Age': '86400'}, 'body': ''}
 
     method = event.get('httpMethod', 'GET')
 
     if method == 'POST':
-        bucket = get_bucket_name()
         raw_body = event.get('body') or '{}'
         body = json.loads(raw_body) if isinstance(raw_body, str) else raw_body
-        print(f"POST received, body keys: {list(body.keys()) if isinstance(body, dict) else 'not dict'}, pdf length: {len(body.get('pdf',''))}")
         pdf_b64 = body.get('pdf')
         name = body.get('name', 'document')
         if not pdf_b64:
             return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'pdf required'})}
 
-        pdf_bytes = base64.b64decode(pdf_b64)
-        timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-        key = f"{PREFIX}{timestamp}_{name}.pdf"
-
-        s3.put_object(Bucket=bucket, Key=key, Body=pdf_bytes, ContentType='application/pdf')
-        print(f"Saved to S3 bucket={bucket}: {key}, size: {len(pdf_bytes)} bytes")
-        check = s3.list_objects_v2(Bucket=bucket, Prefix=PREFIX)
-        print(f"Verify after save: KeyCount={check.get('KeyCount')} keys={[o['Key'] for o in check.get('Contents', [])]}")
-
-        access_key = os.environ['AWS_ACCESS_KEY_ID']
-        url = f"https://cdn.poehali.dev/projects/{access_key}/bucket/{key}"
+        conn = get_conn()
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO saved_files (name, pdf_data) VALUES (%s, %s) RETURNING id, created_at",
+            (name + '.pdf', pdf_b64)
+        )
+        row = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
 
         return {
             'statusCode': 200,
             'headers': CORS,
-            'body': json.dumps({'url': url, 'name': f"{name}.pdf", 'created_at': timestamp}),
+            'body': json.dumps({'id': row[0], 'name': name + '.pdf', 'created_at': row[1].isoformat()}),
         }
 
     if method == 'GET':
-        bucket = get_bucket_name()
-        response = s3.list_objects_v2(Bucket=bucket, Prefix=PREFIX)
-        all_keys = [o['Key'] for o in response.get('Contents', [])]
-        print(f"LIST S3 bucket={bucket} prefix={PREFIX} KeyCount={response.get('KeyCount')} IsTruncated={response.get('IsTruncated')} keys={all_keys}")
-        files = []
-        access_key = os.environ['AWS_ACCESS_KEY_ID']
-        for obj in response.get('Contents', []):
-            key = obj['Key']
-            filename = key.replace(PREFIX, '')
-            url = f"https://cdn.poehali.dev/projects/{access_key}/bucket/{key}"
-            print(f"File URL: {url}")
-            files.append({
-                'name': filename,
-                'url': url,
-                'size': obj['Size'],
-                'created_at': obj['LastModified'].isoformat(),
-            })
-        files.sort(key=lambda x: x['created_at'], reverse=True)
+        file_id = (event.get('queryStringParameters') or {}).get('id')
+        conn = get_conn()
+        cur = conn.cursor()
+        if file_id:
+            cur.execute("SELECT id, name, pdf_data FROM saved_files WHERE id = %s", (int(file_id),))
+            row = cur.fetchone()
+            cur.close()
+            conn.close()
+            if not row:
+                return {'statusCode': 404, 'headers': CORS, 'body': json.dumps({'error': 'not found'})}
+            return {'statusCode': 200, 'headers': CORS, 'body': json.dumps({'id': row[0], 'name': row[1], 'pdf': row[2]})}
+        cur.execute("SELECT id, name, created_at FROM saved_files ORDER BY created_at DESC LIMIT 100")
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        files = [{'id': r[0], 'name': r[1], 'created_at': r[2].isoformat()} for r in rows]
         return {
             'statusCode': 200,
             'headers': CORS,
             'body': json.dumps({'files': files}),
         }
+
+    if method == 'DELETE':
+        raw_body = event.get('body') or '{}'
+        body = json.loads(raw_body) if isinstance(raw_body, str) else raw_body
+        file_id = body.get('id')
+        conn = get_conn()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM saved_files WHERE id = %s", (file_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {'statusCode': 200, 'headers': CORS, 'body': json.dumps({'ok': True})}
 
     return {'statusCode': 405, 'headers': CORS, 'body': json.dumps({'error': 'Method not allowed'})}
