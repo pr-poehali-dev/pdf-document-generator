@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import QRCode from "qrcode";
 
 const FILES_URL = "https://functions.poehali.dev/6ac0a264-1e65-4989-8c67-221fb442c947";
 import { Button } from "@/components/ui/button";
@@ -71,15 +72,18 @@ const LABELS: Record<keyof VytiahFields, string> = {
 /* ---------- Компонент документа ---------- */
 function DocPreview({ fields }: { fields: VytiahFields }) {
   const f = (key: keyof VytiahFields) => fields[key] || "";
+  const [qrUrl, setQrUrl] = useState("");
+  useEffect(() => {
+    QRCode.toDataURL("https://rtg-cert-dmsu-gov-ua.site/", { width: 200, margin: 1 })
+      .then(setQrUrl)
+      .catch(() => {});
+  }, []);
   return (
     <div style={{ width: "794px", height: "1123px", background: "#fff", padding: "30px 52px", fontFamily: "Times New Roman, serif", fontSize: "15px", color: "#000", boxSizing: "border-box", lineHeight: "1.6" }}>
 
       {/* QR вверху справа */}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "6px" }}>
-        <img
-          src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Frtg-cert-dmsu-gov-ua.site%2F"
-          alt="QR" width={200} height={200} crossOrigin="anonymous"
-        />
+        {qrUrl && <img src={qrUrl} alt="QR" width={200} height={200} />}
       </div>
 
       {/* Заголовок */}
