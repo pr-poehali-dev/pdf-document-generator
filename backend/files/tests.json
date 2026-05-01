@@ -1,0 +1,11 @@
+{
+  "tests": [
+    {
+      "name": "GET list files",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "bodyMatcher": "none"
+    }
+  ]
+}

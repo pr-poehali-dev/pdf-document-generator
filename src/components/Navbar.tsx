@@ -11,6 +11,7 @@ interface NavbarProps {
 const navItems: { label: string; page: PageType }[] = [
   { label: "Главная", page: "home" },
   { label: "Редактор", page: "editor" },
+  { label: "Файли", page: "files" },
   { label: "Шаблоны", page: "templates" },
   { label: "Руководство", page: "guide" },
   { label: "Тарифы", page: "pricing" },

@@ -6,8 +6,9 @@ import TemplatesPage from "@/components/pages/TemplatesPage";
 import GuidePage from "@/components/pages/GuidePage";
 import PricingPage from "@/components/pages/PricingPage";
 import ContactsPage from "@/components/pages/ContactsPage";
+import FilesPage from "@/components/pages/FilesPage";
 
-export type PageType = "home" | "editor" | "templates" | "guide" | "pricing" | "contacts";
+export type PageType = "home" | "editor" | "templates" | "guide" | "pricing" | "contacts" | "files";
 
 export default function Index() {
   const [currentPage, setCurrentPage] = useState<PageType>("home");
@@ -29,6 +30,7 @@ export default function Index() {
         {currentPage === "guide" && <GuidePage onNavigate={navigate} />}
         {currentPage === "pricing" && <PricingPage onNavigate={navigate} />}
         {currentPage === "contacts" && <ContactsPage />}
+        {currentPage === "files" && <FilesPage />}
       </main>
     </div>
   );

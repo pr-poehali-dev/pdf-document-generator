@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import func2url from "../../backend/func2url.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -220,8 +221,14 @@ export default function EditorPage({ selectedTemplate: _selectedTemplate }: Edit
           offsetY += availH;
         }
       }
+      const pdfBase64 = pdf.output("datauristring").split(",")[1];
+      await fetch(func2url.files, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pdf: pdfBase64, name: "Витяг_з_реєстру_територіальної_громади" }),
+      });
       pdf.save("Витяг_з_реєстру_територіальної_громади.pdf");
-      toast({ title: "PDF готовий!", description: "Документ збережено у папку «Завантаження»" });
+      toast({ title: "PDF готовий!", description: "Документ збережено у «Файли» та завантажено на пристрій" });
     } catch (e) {
       console.error(e);
       toast({ title: "Помилка генерації", variant: "destructive" });
