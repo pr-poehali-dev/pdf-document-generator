@@ -9,6 +9,8 @@ s3 = boto3.client(
     endpoint_url='https://bucket.poehali.dev',
     aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
     aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+    region_name='us-east-1',
+    config=boto3.session.Config(signature_version='s3v4', s3={'addressing_style': 'path'}),
 )
 BUCKET = 'files'
 PREFIX = 'pdfs/'
