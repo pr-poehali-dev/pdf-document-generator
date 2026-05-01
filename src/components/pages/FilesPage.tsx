@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
-import func2url from "../../../backend/func2url.json";
+const FILES_URL = "https://functions.poehali.dev/6ac0a264-1e65-4989-8c67-221fb442c947";
 
 interface FileItem {
   name: string;
@@ -15,11 +15,11 @@ export default function FilesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(func2url.files)
+    fetch(FILES_URL)
       .then((r) => r.json())
       .then((data) => {
         const parsed = typeof data === "string" ? JSON.parse(data) : data;
-        setFiles(parsed.files || []);
+        setFiles((parsed.files as FileItem[]) || []);
       })
       .finally(() => setLoading(false));
   }, []);
