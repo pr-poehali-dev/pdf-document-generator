@@ -56,7 +56,18 @@ def handler(event: dict, context) -> dict:
             conn.close()
             if not row:
                 return {'statusCode': 404, 'headers': CORS, 'body': json.dumps({'error': 'not found'})}
-            return {'statusCode': 200, 'headers': CORS, 'body': json.dumps({'id': row[0], 'name': row[1], 'pdf': row[2]})}
+            import base64
+            pdf_bytes = base64.b64decode(row[2])
+            return {
+                'statusCode': 200,
+                'headers': {
+                    **CORS,
+                    'Content-Type': 'application/pdf',
+                    'Content-Disposition': f'inline; filename="{row[1]}"',
+                },
+                'body': base64.b64encode(pdf_bytes).decode(),
+                'isBase64Encoded': True,
+            }
         cur.execute("SELECT id, name, created_at FROM saved_files ORDER BY created_at DESC LIMIT 100")
         rows = cur.fetchall()
         cur.close()

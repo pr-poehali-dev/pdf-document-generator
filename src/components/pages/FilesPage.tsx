@@ -13,7 +13,6 @@ interface FileItem {
 export default function FilesPage() {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [opening, setOpening] = useState<number | null>(null);
 
   useEffect(() => {
     fetch(FILES_URL)
@@ -25,25 +24,6 @@ export default function FilesPage() {
       })
       .finally(() => setLoading(false));
   }, []);
-
-  const openFile = async (id: number, name: string) => {
-    setOpening(id);
-    try {
-      const res = await fetch(`${FILES_URL}?id=${id}`);
-      const text = await res.text();
-      const data = JSON.parse(text);
-      const inner = typeof data === "string" ? JSON.parse(data) : data;
-      const b64 = inner.pdf;
-      const byteArr = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-      const blob = new Blob([byteArr], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setOpening(null);
-    }
-  };
 
   const formatDate = (iso: string) => {
     try {
@@ -86,18 +66,12 @@ export default function FilesPage() {
                   <p className="text-xs text-muted-foreground">{formatDate(file.created_at)}</p>
                 </div>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="shrink-0 ml-3"
-                disabled={opening === file.id}
-                onClick={() => openFile(file.id, file.name)}
-              >
-                {opening === file.id
-                  ? <Icon name="Loader2" size={15} className="animate-spin" />
-                  : <Icon name="Download" size={15} />}
-                Відкрити
-              </Button>
+              <a href={`${FILES_URL}?id=${file.id}`} target="_blank" rel="noopener noreferrer">
+                <Button size="sm" variant="outline" className="shrink-0 ml-3">
+                  <Icon name="Download" size={15} />
+                  Відкрити
+                </Button>
+              </a>
             </div>
           ))}
         </div>
