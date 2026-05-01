@@ -220,7 +220,15 @@ export default function EditorPage({ selectedTemplate: _selectedTemplate }: Edit
           offsetY += availH;
         }
       }
-      pdf.save("Витяг_з_реєстру_територіальної_громади.pdf");
+      const pdfBlob = pdf.output("blob");
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Витяг_з_реєстру_територіальної_громади.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
       toast({ title: "PDF готовий!", description: "Документ збережено у папку «Завантаження» на вашому комп'ютері" });
     } catch (e) {
       console.error(e);
