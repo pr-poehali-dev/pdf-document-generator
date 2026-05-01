@@ -220,10 +220,8 @@ export default function EditorPage({ selectedTemplate: _selectedTemplate }: Edit
           offsetY += availH;
         }
       }
-      const pdfBlob = pdf.output("blob");
-      const url = URL.createObjectURL(pdfBlob);
-      window.open(url, "_blank");
-      toast({ title: "PDF готовий!", description: "Документ відкрито у новій вкладці — збережіть його звідти" });
+      pdf.save("Витяг_з_реєстру_територіальної_громади.pdf");
+      toast({ title: "PDF готовий!", description: "Документ збережено у папку «Завантаження»" });
     } catch (e) {
       console.error(e);
       toast({ title: "Помилка генерації", variant: "destructive" });
