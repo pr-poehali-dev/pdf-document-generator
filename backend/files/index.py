@@ -28,7 +28,9 @@ def handler(event: dict, context) -> dict:
     method = event.get('httpMethod', 'GET')
 
     if method == 'POST':
-        body = json.loads(event.get('body') or '{}')
+        raw_body = event.get('body') or '{}'
+        body = json.loads(raw_body) if isinstance(raw_body, str) else raw_body
+        print(f"POST received, body keys: {list(body.keys()) if isinstance(body, dict) else 'not dict'}, pdf length: {len(body.get('pdf',''))}")
         pdf_b64 = body.get('pdf')
         name = body.get('name', 'document')
         if not pdf_b64:
@@ -39,6 +41,7 @@ def handler(event: dict, context) -> dict:
         key = f"{PREFIX}{timestamp}_{name}.pdf"
 
         s3.put_object(Bucket=BUCKET, Key=key, Body=pdf_bytes, ContentType='application/pdf')
+        print(f"Saved to S3: {key}, size: {len(pdf_bytes)} bytes")
 
         access_key = os.environ['AWS_ACCESS_KEY_ID']
         url = f"https://cdn.poehali.dev/projects/{access_key}/bucket/{key}"
